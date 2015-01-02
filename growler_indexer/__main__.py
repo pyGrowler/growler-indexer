@@ -19,7 +19,7 @@ aparser.add_argument('dir', default= 'cwd', help='Directory to serve <Defaults C
 args = aparser.parse_args()
 
 app = growler.App(__name__)
-app.use(Indexer(args.dir))
+app.use(Indexer(args.dir[0]))
 
 app.run()
 
