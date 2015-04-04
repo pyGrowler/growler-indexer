@@ -2,11 +2,13 @@
 growler-indexer
 ===============
 
-Middleware for growler which generates an 'index view' of a directory.
+Middleware for Growler web framework which creates a pretty index view of files
+and folders within a directory in the file system. Options can be passed to the
+middleware to change styles and viewing rules.
 
-This package can be imported to host specific directories on the server,
-or can be called on the command line to create an easy file server for
-quick access on a network.
+This package can be imported to host specific directories on the server, or can
+be called on the command line to create an easy file server for quick access on
+a network.
 
 On the command line, you can host the current directory on port 8000
 using
