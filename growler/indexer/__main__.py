@@ -3,7 +3,7 @@
 #
 
 import growler
-from growler_indexer.middleware import Indexer
+from growler.indexer.middleware import Indexer
 
 from argparse import ArgumentParser
 from os import (stat, getcwd)

@@ -5,7 +5,7 @@
 Middleware for growler which generates an 'index view' of a directory.
 """
 
-import growler_indexer
+import growler.indexer as growler_indexer
 from setuptools import setup, find_packages
 
 REQUIRES = [
@@ -13,8 +13,9 @@ REQUIRES = [
 ]
 
 setup(
-    name="growler_indexer",
+    name="growler.indexer",
     packages=['growler.indexer'],
+    namespace_packages=['growler'],
     version=growler_indexer.__version__,
     author=growler_indexer.__author__,
     license=growler_indexer.__license__,
@@ -31,5 +32,6 @@ setup(
         "Topic :: Internet :: WWW/HTTP",
         "Natural Language :: English"
     ],
+    platforms=['any'],
     install_requires=REQUIRES
 )
