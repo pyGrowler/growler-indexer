@@ -1,16 +1,15 @@
 #
-# growler_indexer/middleware.py
+# growler/indexer/middleware.py
 #
 
 from os import (path, listdir)
 from string import (Template)
 
-
 class Indexer():
-  
+
   html_tmpl = Template("""<!DOCTYPE html><html><head>$head</head><body>$body</body></html>""")
   head_tmpl = Template("""<title>$title</title>""")
-  
+
   def __init__(self, dir, prefix = "/"):
     print("[Indexer::__init__]")
     self.path = dir
@@ -35,7 +34,7 @@ class Indexer():
       res.send_file(tpath)
       return
 
-    filelinks = ["<a href='{0}'>{1}</a>".format('http://' + req.headers['host'] + req.path + '/' + f, f) for f in filenames]    
+    filelinks = ["<a href='{0}'>{1}</a>".format('http://' + req.headers['host'] + req.path + '/' + f, f) for f in filenames]
     ul = "<ul><li>%s</li></ul>" % ("</li><li>".join(filelinks))
 
     title = "Index of %s" % (self.path)

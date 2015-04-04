@@ -21,7 +21,7 @@ In a webserver you use this module as:
 
 
     import growler
-    from growler_indexer.middleware import Indexer
+    from growler.indexer.middleware import Indexer
 
     app = growler.App(__name__)
     app.use("/path1", Indexer("/path/to/be/served"))

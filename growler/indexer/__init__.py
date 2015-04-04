@@ -1,5 +1,5 @@
 #
-# growler_indexer/__index__.py
+# growler/indexer/__index__.py
 #
 
 __version__ = "0.1.0"
