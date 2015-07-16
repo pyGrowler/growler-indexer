@@ -20,7 +20,7 @@ def parse_arguments(args):
                         type=int,
                         default=8989,
                         help='Port server will listen on')
-    parser.add_argument('-h', '--host',
+    parser.add_argument('-H', '--host',
                         default='localhost',
                         help='Port host will listen on')
     parser.add_argument('--prefix',
