@@ -13,9 +13,8 @@ REQUIRES = [
 ]
 
 setup(
-    name="growler.indexer",
+    name="growler_indexer",
     packages=['growler.indexer'],
-    namespace_packages=['growler'],
     version=growler_indexer.__version__,
     author=growler_indexer.__author__,
     license=growler_indexer.__license__,
