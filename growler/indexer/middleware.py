@@ -3,19 +3,18 @@
 #
 
 from os import (path, listdir)
-from string import (Template)
 
 HTML_TMPL_STR = """
 <!DOCTYPE html>
 <html>
-  <head>$head</head>
-  <body>$body</body>
+  <head>{head}</head>
+  <body>{body}</body>
 </html>
 """
 
 HEAD_TMPL_STR = """
 <meta charset=utf8>
-<title>$title</title>
+<title>{title}</title>
 """
 
 BODY_TMPL_STR = """
@@ -24,7 +23,7 @@ BODY_TMPL_STR = """
 """
 
 ERR_BODY_TMPL_STR = """
-<h1>404 - Not Found</h1>
+<h1>{error}</h1>
 <p>The requested URL '{path}' was not found on this server.</p>
 """
 
@@ -35,11 +34,6 @@ class Indexer():
     rendering.
     """
 
-    html_tmpl = Template(HTML_TMPL_STR)
-    head_tmpl = Template(HEAD_TMPL_STR)
-    body_tmpl = Template(BODY_TMPL_STR)
-    err_404_tmpl = Template(ERR_BODY_TMPL_STR)
-
     def __init__(self, dir, prefix='/'):
         """
         Construct an Indexer middleware object, provided a directory to call
@@ -48,7 +42,7 @@ class Indexer():
         @param dir str: The path to the directory to serve.
         @param prefix str: The http prefix
         """
-        print("[Indexer::__init__] (%s, %s)" % (dir, prefix))
+        print("[Indexer::__init__] dir=%s, prefix=%s" % (dir, prefix))
         self.path = dir
         self.prefix = prefix
         self.abs = path.abspath(path.expanduser(dir))
@@ -59,27 +53,32 @@ class Indexer():
         The middleware function for incoming requests. The path is split and
         explored.
         """
+        code = 200
         tpath = path.join(self.abs, *req.path[1:].split('/'))
-        print(req.protocol)
-        print(req.headers, req.headers['host'])
         try:
             filenames = listdir(tpath)
         except FileNotFoundError:
-            head = self.head_tmpl.substitute(title="404 Not Found")
-            body = self.err_404_tmpl.substitute(path=self.abs)
-            res.send_html(self.html_tmpl.substitute(head=head, body=body), 404)
-            return
-        except Exception as e:
-            print("ERRRR", e, tpath)
+            head = HEAD_TMPL_STR.format(title="404 Not Found")
+            body = ERR_BODY_TMPL_STR.format(error='404 - Not Found',
+                                            path=self.abs)
+            code = 404
+        except NotADirectoryError:
             res.send_file(tpath)
             return
-        hostname = (req.headers['host'], req.path)
-        filename_frmt = "<a href='http://%s%s/{0}'>{1}</a>" % hostname
-        filelinks = [filename_frmt.format(f) for f in filenames]
-        file_list = "<li>%s</li>" % ("</li><li>".join(filelinks))
+        except Exception as e:
+            x = "%s' returned the error '%s'" % (self.abs, e)
+            head = HEAD_TMPL_STR.format(title="ERROR")
+            body = ERR_BODY_TMPL_STR.format(error='500 - Server Error',
+                                            path=x)
+            code = 500
+        else:
+            hostname = (req.headers['HOST'], req.path)
+            filename_frmt = "<a href='http://%s%s/{0}'>{0}</a>" % hostname
+            filelinks = [filename_frmt.format(f) for f in filenames]
+            file_list = "<li>%s</li>" % ("</li><li>".join(filelinks))
 
-        title = "Index of %s" % (self.path)
-        head = self.head_tmpl.substitute(title=title)
+            title = "Index of %s" % (self.path)
+            head = HEAD_TMPL_STR.format(title=title)
+            body = BODY_TMPL_STR.format(path=self.abs, file_list=file_list)
 
-        body = self.body_tmpl.substitute(path=self.abs, file_list=file_list)
-        res.send_html(self.html_tmpl.substitute(head=head, body=body))
+        res.send_html(HTML_TMPL_STR.format(head=head, body=body), code)
