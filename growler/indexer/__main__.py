@@ -5,25 +5,45 @@
 import growler
 from growler.indexer.middleware import Indexer
 
+import sys
+import os
 from argparse import ArgumentParser
-from os import (stat, getcwd)
-from sys import argv
 
-def main(args):
 
-    cwd = getcwd()
+def parse_arguments(args):
+    """
+    Parses the arguments passed to the script using python's
+    argparse.ArgumentParser.
+    """
+    parser = ArgumentParser(prog='growler.indexer')
+    parser.add_argument('-p', '--port',
+                        type=int,
+                        default=8989,
+                        help='Port server will listen on')
+    parser.add_argument('-h', '--host',
+                        default='localhost',
+                        help='Port host will listen on')
+    parser.add_argument('--prefix',
+                        default='',
+                        help='Prefix URL')
+    parser.add_argument('dir',
+                        default=os.getcwd(),
+                        nargs='*',
+                        help='Directory to serve <Defaults Current>')
+    return parser.parse_args(args)
+
+
+def main(argv):
+    """
+    Main function provided by the growler-indexer to allow python to execute
+    the module.
+    """
+    args = parse_arguments(argv)
 
     app = growler.App(__name__)
     app.use(Indexer(args.dir[0]))
 
-    app.run()
+    app.create_server_and_run_forever(host=args.host, port=args.port)
 
 if __name__ == '__main__':
-    aparser = ArgumentParser(prog='<prog>')
-    aparser.add_argument('--port', type=int, default=8989, help='Port server will listen on')
-    aparser.add_argument('--host', default='localhost', help='Port host will listen on')
-    aparser.add_argument('--prefix', default='', help='Prefix URL')
-    aparser.add_argument('dir', default= 'cwd', help='Directory to serve <Defaults Current>', nargs='*')
-    args = aparser.parse_args()
-
-    sys.exit(main(args))
+    sys.exit(main(sys.argv[1:]))
