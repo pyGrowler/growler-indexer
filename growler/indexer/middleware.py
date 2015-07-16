@@ -5,6 +5,29 @@
 from os import (path, listdir)
 from string import (Template)
 
+HTML_TMPL_STR = """
+<!DOCTYPE html>
+<html>
+  <head>$head</head>
+  <body>$body</body>
+</html>
+"""
+
+HEAD_TMPL_STR = """
+<meta charset=utf8>
+<title>$title</title>
+"""
+
+BODY_TMPL_STR = """
+<h1>Index of {path}</h1>
+<ul>{file_list}</ul>
+"""
+
+ERR_BODY_TMPL_STR = """
+<h1>404 - Not Found</h1>
+<p>The requested URL '{path}' was not found on this server.</p>
+"""
+
 
 class Indexer():
     """
@@ -12,12 +35,10 @@ class Indexer():
     rendering.
     """
 
-    html_tmpl = Template("<!DOCTYPE html>"
-                         "<html>"
-                         "  <head>$head</head>"
-                         "  <body>$body</body>"
-                         "</html>")
-    head_tmpl = Template("<title>$title</title>")
+    html_tmpl = Template(HTML_TMPL_STR)
+    head_tmpl = Template(HEAD_TMPL_STR)
+    body_tmpl = Template(BODY_TMPL_STR)
+    err_404_tmpl = Template(ERR_BODY_TMPL_STR)
 
     def __init__(self, dir, prefix='/'):
         """
@@ -45,21 +66,20 @@ class Indexer():
             filenames = listdir(tpath)
         except FileNotFoundError:
             head = self.head_tmpl.substitute(title="404 Not Found")
-            body = ("<h1>404 - Not Found</h1>"
-                    "<p>The requested URL %s was not found on"
-                    "this server.</p>") % (self.abs)
+            body = self.err_404_tmpl.substitute(path=self.abs)
             res.send_html(self.html_tmpl.substitute(head=head, body=body), 404)
             return
         except Exception as e:
             print("ERRRR", e, tpath)
             res.send_file(tpath)
             return
-        hostname = ''.join([req.headers['host'], req.path, '/'])
-        filename_frmt = "<a href='http://%s{0}'>{1}</a>" % hostname
+        hostname = (req.headers['host'], req.path)
+        filename_frmt = "<a href='http://%s%s/{0}'>{1}</a>" % hostname
         filelinks = [filename_frmt.format(f) for f in filenames]
-        ul = "<ul><li>%s</li></ul>" % ("</li><li>".join(filelinks))
+        file_list = "<li>%s</li>" % ("</li><li>".join(filelinks))
 
         title = "Index of %s" % (self.path)
-        body = "<h1>Index of %s</h1>%s" % (self.abs, ul)
         head = self.head_tmpl.substitute(title=title)
+
+        body = self.body_tmpl.substitute(path=self.abs, file_list=file_list)
         res.send_html(self.html_tmpl.substitute(head=head, body=body))
