@@ -6,7 +6,6 @@ import growler
 from growler.indexer.middleware import Indexer
 
 import sys
-import os
 from argparse import ArgumentParser
 
 
@@ -27,9 +26,10 @@ def parse_arguments(args):
                         default='',
                         help='Prefix URL')
     parser.add_argument('dir',
-                        default=os.getcwd(),
+                        default='.',
                         nargs='*',
-                        help='Directory to serve <Defaults Current>')
+                        help=('Directory to serve. Default is current'
+                              'directory.'))
     return parser.parse_args(args)
 
 
