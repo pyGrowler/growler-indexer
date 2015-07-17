@@ -22,9 +22,14 @@ BODY_TMPL_STR = """
 <ul>{file_list}</ul>
 """
 
-ERR_BODY_TMPL_STR = """
-<h1>{error}</h1>
+PATH_NOT_FOUND_ERR_BODY_TMPL_STR = """
+<h1>404 - Not Found</h1>
 <p>The requested URL '{path}' was not found on this server.</p>
+"""
+
+SERVER_ERROR_TMPL_STR = """
+<h1>{error}</h1>
+<p>{msg}</p>
 """
 
 
@@ -59,17 +64,16 @@ class Indexer():
             filenames = listdir(tpath)
         except FileNotFoundError:
             head = HEAD_TMPL_STR.format(title="404 Not Found")
-            body = ERR_BODY_TMPL_STR.format(error='404 - Not Found',
-                                            path=self.abs)
+            body = PATH_NOT_FOUND_ERR_BODY_TMPL_STR.format(path=self.abs)
             code = 404
         except NotADirectoryError:
             res.send_file(tpath)
             return
         except Exception as e:
-            x = "%s' returned the error '%s'" % (self.abs, e)
+            msg = "path '%s' returned the error '%s'" % (self.abs, e)
             head = HEAD_TMPL_STR.format(title="ERROR")
-            body = ERR_BODY_TMPL_STR.format(error='500 - Server Error',
-                                            path=x)
+            body = SERVER_ERROR_TMPL_STR.format(error='500 - Server Error',
+                                                msg=msg)
             code = 500
         else:
             hostname = (req.headers['HOST'], req.path)
